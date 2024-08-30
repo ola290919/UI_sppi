@@ -1,4 +1,4 @@
-# API Tests
+# UI Tests
 
 
 

@@ -1,13 +1,13 @@
 import os
 import time
-from enum import Enum
-from dotenv import load_dotenv
-
-from pydantic import BaseModel
 from threading import Lock
+
 import requests
+from dotenv import load_dotenv
+from pydantic import BaseModel
 
 load_dotenv()
+
 
 class AuthTokensResult(BaseModel):
     access_token: str
@@ -81,7 +81,7 @@ class AuthPage:
 
         return AuthTokensResult(**response)
 
-    def get_access_token(self, login: str, password: str) -> str:
+    def get_access_refresh_token(self, login: str, password: str) -> str:
         if not login or not password:
             raise Exception('Login and password are required for getting SPPI tokens')
 
@@ -99,7 +99,7 @@ class AuthPage:
                 self.tokens[login] = {
                     'access_token': response.access_token,
                     'refresh_token': response.refresh_token,
-                    'expiry_time': time.time() + float(os.getenv('DEV_REFRESH_TOKEN_EXPIRE_MINUTES', 4)) * 60
+                    'expiry_time': time.time() + float(os.getenv('DEV_REFRESH_TOKEN_EXPIRE_MINUTES')) * 60
                 }
 
                 return self.tokens[login]['access_token']
@@ -110,16 +110,17 @@ class AuthPage:
         self.tokens[login] = {
             'access_token': response.access_token,
             'refresh_token': response.refresh_token,
-            'expiry_time': time.time() + float(os.getenv('DEV_REFRESH_TOKEN_EXPIRE_MINUTES', 4)) * 60
+            'expiry_time': time.time() + float(os.getenv('DEV_REFRESH_TOKEN_EXPIRE_MINUTES')) * 60
         }
 
-        return self.tokens[login]['access_token']
+        return (self.tokens[login]['access_token'], self.tokens[login]['refresh_token'])
 
     def as_admin(self):
 
-        return self.get_access_token(os.getenv('DEV_ADMIN_USER'), os.getenv('DEV_ADMIN_PASSWORD'))
+        return self.get_access_refresh_token(os.getenv('DEV_ADMIN_USER'), os.getenv('DEV_ADMIN_PASSWORD'))
 
-
+    def as_pilot(self):
+        return self.get_access_refresh_token(os.getenv('DEV_PILOT_USER'), os.getenv('DEV_PILOT_PASSWORD'))
 
 # auth = AuthPage()
 #
@@ -130,8 +131,3 @@ class AuthPage:
 #         methods = {
 #             self.ADMIN: auth.as_admin
 #         }
-
-
-
-
-

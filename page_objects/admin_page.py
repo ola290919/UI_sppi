@@ -6,8 +6,7 @@ import os
 from playwright.sync_api import expect, Locator, Page
 
 
-
-class BasePage():
+class AdminPage():
     """Базовый класс"""
 
     def __init__(self, page: Page, auth_admin):
@@ -16,9 +15,7 @@ class BasePage():
         self.admin_page = auth_admin
 
 
-    def go_profile(self):
-
+    def go_profile_admin(self):
         self.admin_page.goto('http://app.sppi.dev.plan/profile')
         expect(self.admin_page).to_have_title('СППИ - Профиль')
         return self
-

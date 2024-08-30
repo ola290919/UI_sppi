@@ -2,6 +2,7 @@
 Фикстура для проекта
 """
 from typing import Dict
+import datetime
 
 import allure
 import pytest
@@ -48,16 +49,58 @@ from page_objects.auth_page import AuthPage
 def auth_admin(playwright, page: Page):
 
     browser = playwright.chromium.launch(channel="chrome", headless=False)
-
-    token = AuthPage().as_admin()
-
+    access_token, refresh_token = AuthPage().as_admin()
     context = browser.new_context()
-    context.add_cookies([{'name': 'refresh_token', 'value': token, 'url': 'http://app.sppi.dev.plan'},
-                         {'name': 'authorization', 'value': token, 'url': 'http://app.sppi.dev.plan'}])
-
+    expires = int((datetime.datetime.now() + datetime.timedelta(minutes=3)).timestamp())
+    context.add_cookies([{'name': 'refresh_token',
+                          'value': refresh_token,
+                          'path': '/',
+                          'domain': 'http://app.sppi.dev.plan',
+                          'httpOnly': True,
+                          'secure': False,
+                          'sameSite': 'Strict',
+                          'expires': expires
+                          },
+                         {'name': 'authorization',
+                          'value': access_token,
+                          'path': '/',
+                          'domain': 'http://app.sppi.dev.plan',
+                          'httpOnly': True,
+                          'secure': False,
+                          'sameSite': 'Strict',
+                          'expires': expires
+                          }])
     page = context.new_page()
     yield page
     page.close()
     browser.close()
 
+@pytest.fixture()
+def auth_pilot(playwright, page: Page):
 
+    browser = playwright.chromium.launch(channel="chrome", headless=False)
+    access_token, refresh_token = AuthPage().as_pilot()
+    context = browser.new_context()
+    expires = int((datetime.datetime.now() + datetime.timedelta(minutes=3)).timestamp())
+    context.add_cookies([{'name': 'refresh_token',
+                          'value': refresh_token,
+                          'path': '/',
+                          'domain': 'http://app.sppi.dev.plan',
+                          'httpOnly': True,
+                          'secure': False,
+                          'sameSite': 'Strict',
+                          'expires': expires
+                          },
+                         {'name': 'authorization',
+                          'value': access_token,
+                          'path': '/',
+                          'domain': 'http://app.sppi.dev.plan',
+                          'httpOnly': True,
+                          'secure': False,
+                          'sameSite': 'Strict',
+                          'expires': expires
+                          }])
+    page = context.new_page()
+    yield page
+    page.close()
+    browser.close()
