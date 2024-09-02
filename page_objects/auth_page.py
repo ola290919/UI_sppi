@@ -38,8 +38,8 @@ class AuthPage:
         return cls._instance
 
     def __init__(self):
-        self.session = requests.Session()
         if not hasattr(self, '_initialized'):
+            self.session = requests.Session()
             self._initialized = True
             self._base_url = os.getenv('RC_API_BASE_URL')
             self.secret_key = os.getenv('RC_API_SECRET_KEY')

@@ -42,20 +42,28 @@ def auth(playwright, page: Page):
     browser = playwright.chromium.launch(headless=False)
 
     class AuthorizedPage:
-        def wrapper(self, auth_type: As):
+
+        def wrapper(self, auth_type: As) -> Page:
             access_token, refresh_token = auth_type.tokens()
             access_payload, refresh_payload = auth_type.payload()
             storage_state_data = make_storage_state_data(access_payload, refresh_payload)
             with open("state.json", "w") as f:
                 json.dump({"origins": [storage_state_data]}, f)
-            context = browser.new_context(storage_state="state.json")
+            self.context = browser.new_context(storage_state="state.json")
             cookies = make_cokies(access_token, refresh_token)
-            context.add_cookies(cookies)
-            page = context.new_page()
-            return page
+            self.context.add_cookies(cookies)
+            self.page = self.context.new_page()
+            return self.page
+
+        def close_context(self):
+            self.context.close()
+            self.page.close()
+            return self
 
     page = AuthorizedPage()
 
     yield page.wrapper
+
+    page.close_context
 
     browser.close()

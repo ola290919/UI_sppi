@@ -1,124 +1,76 @@
-import allure
-
 import os
-from playwright.sync_api import expect, Locator, Page
-from page_objects.base_page import BasePage
-from helpers import random_string
+
+from playwright.sync_api import expect, Page
 
 
-class BlaPage(BasePage):
+class BlaPage:
+    def __init__(self, page: Page):
+        self.page = page
+        self.base_url = os.getenv('BASE_URL_RC')
+        self.input_name = self.page.locator('//input[@formcontrolname="name"]')
+        self.input_weight_exact = self.page.locator('//input[@type="number" and @formcontrolname="value"]')
+        self.aircraft_identification = self.page.locator('//input[@formcontrolname = "aircraftIdentification"]')
+        self.registration_number = self.page.locator('//input[@formcontrolname = "registrationNumber"]')
+        self.serial_number = self.page.locator('//input[@formcontrolname = "serialNumber"]')
+        self.pilot_licence = self.page.locator('//input[@formcontrolname = "remotePilotLicence"]')
+        self.model_bvs = self.page.locator('//als-select-with-search[@formcontrolname="model"]').locator(
+            '//input[@placeholder="Поиск..."]')
+        self.field_text_not_found = self.page.get_by_text('Не найдено')
+        self.opr = self.page.locator('//input[@formcontrolname = "opr"]')
+        self.max_flight_time = self.page.locator('//input[@data-testid="alsTimeInputElement"]')
+        self.max_flight_range_value = self.page.locator('//mat-form-field[@formgroupname="maxFlightDistance"]').locator(
+            '//input[@formcontrolname="value"]')
+        self.level_1_value = self.page.locator('//mat-form-field[@formgroupname="level1"]').locator(
+            '//input[@formcontrolname="value"]')
+        self.level_2_value = self.page.locator('//mat-form-field[@formgroupname="level2"]').locator(
+            '//input[@formcontrolname="value"]')
+        self.button_save = self.page.get_by_role("button", name="Сохранить")
+        self.pop_up_save_bla = self.page.get_by_text('BLA создан')
 
-    BLA_NAME = random_string() + 'AUTOTEST'
-    INPUT_NAME = '//input[@formcontrolname="name"]'
-    INPUT_WEIGHT_EXACT = '//input[@type="number" and @formcontrolname="value"]'
-    SELECT_WEIGHT_CATEGORY = '//div[@class="mat-select-arrow-wrapper ng-tns-c60-5"]'
-    TEXT_UP_TO_0_15 = '//span[text()=" до 0,15 кг "]'
-    TEXT_FROM_0_15_UP_TO_30 = '//span[text()=" от 0,15 до 30 кг "]'
-    TEXT_MORE_THAN_30 = '//span[text()=" более 30 кг "]'
-    INPUT_AIRCRAFT_IDENTIFICATION = '//input[@formcontrolname = "aircraftIdentification"]'
-    INPUT_PILOT_LICENCE = '//input[@formcontrolname = "remotePilotLicence"]'
-    INPUT_REGISTRATION_NUMBER = '//input[@formcontrolname = "registrationNumber"]'
-    INPUT_SERIAL_NUMBER = '//input[@formcontrolname = "serialNumber"]'
-    INPUT_MODEL_BVS = '//input[@class="mat-input-element border-0 position-absolute ng-untouched ng-pristine ng-valid"]'
-    INPUT_OPR = '//input[@formcontrolname = "opr"]'
-    TEXT_NOT_FOUND = '//span[text()=" Не найдено "]'
-    INPUT_MAX_FLIGHT_TIME = '//input[@data-testid="alsTimeInputElement"]'
-    INPUT_MAX_FLIGHT_RANGE_VALUE = '//input[@class="mat-input-element mat-form-field-autofill-control ng-tns-c49-10 ng-untouched ng-pristine ng-valid cdk-text-field-autofill-monitored"]'
-    BUTTON_MAX_FLIGHT_RANGE_UNIT = '//div[@class="mat-form-field-suffix ng-tns-c49-10 ng-star-inserted"]//button'
-    TEXT_M = '//button[text()=" М "]'
-    TEXT_KM = '//button[text()=" КМ "]'
-    TEXT_NM = '//button[text()=" NM "]'
-    INPUT_LEVEL_1_VALUE = '//label[@class="mat-form-field-label ng-tns-c49-11 mat-empty mat-form-field-empty ng-star-inserted"]'
-    BUTTON_LEVEL_1_UNIT = '//div[@class="mat-form-field-suffix ng-tns-c49-11 ng-star-inserted"]//button'
-    TEXT_M_QNE = '//button[text()=" M/QNE "]'
-    INPUT_LEVEL_2_VALUE = '//label[@class="mat-form-field-label ng-tns-c49-12 mat-empty mat-form-field-empty ng-star-inserted"]'
-    BUTTON_LEVEL_2_UNIT = '//div[@class="mat-form-field-suffix ng-tns-c49-12 ng-star-inserted"]//button'
-    TEXT_M_AMSL = '//button[text()=" M/AMSL "]'
-    BUTTON_SAVE = '//button[@class="mat-focus-indicator w-100 mat-stroked-button mat-button-base mat-primary ng-star-inserted" and @title="Сохранить"]'
-    POP_UP_SAVE_BLA = 'BLA создан'
-    BLA_IN_LIST = f'//div[@class="text-truncate ng-star-inserted" and @title="{BLA_NAME}"]'
+    def choose_weight_category(self, category):
+        self.page.locator('//mat-select[@formcontrolname="weightCategory"]').dblclick()
+        self.page.get_by_role('listbox').get_by_text(category).click()
+        self.page.locator('//mat-select[@formcontrolname="weightCategory"]').get_by_text(category)
+        return self
+
+    def choose_max_flight_range_unit(self, unit):
+        self.max_flight_range_unit = self.page.locator('//mat-form-field[@formgroupname="maxFlightDistance"]').locator(
+            '//als-unit-selector[@formcontrolname="unit"]')
+        self.max_flight_range_unit.click()
+        self.page.get_by_role("menuitem", name=unit, exact=True).click()
+        self.max_flight_range_unit.get_by_text(unit)
+        return self
+
+    def choose_level_1_unit(self, unit):
+        self.level_1_unit = self.page.locator('//mat-form-field[@formgroupname="level1"]').locator(
+            '//als-unit-selector[@formcontrolname="unit"]')
+        self.level_1_unit.click()
+        self.page.get_by_role("menuitem", name=unit).click()
+        self.level_1_unit.get_by_text(unit)
+        return self
+
+    def choose_level_2_unit(self, unit):
+        self.level_2_unit = self.page.locator('//mat-form-field[@formgroupname="level2"]').locator(
+            '//als-unit-selector[@formcontrolname="unit"]')
+        self.level_2_unit.click()
+        self.page.locator("#mat-menu-panel-4").get_by_role("menuitem", name=unit).click()
+        self.level_2_unit.get_by_text(unit)
+        return self
 
     def go_create_bla_page(self):
         self.page.goto(f'{self.base_url}/aircraft/bla/bla/create')
         expect(self.page).to_have_title('СППИ - Воздушные суда - БВС - Добавить')
         return self
 
-    def input_form_up_to_0_15_kg(self):
-
-        self.input_value_by_letter(self.INPUT_NAME, self.BLA_NAME)
-        self.input_value_by_letter(self.INPUT_WEIGHT_EXACT, '0.1')
-        self.page.wait_for_selector(self.SELECT_WEIGHT_CATEGORY).click()
-        self.page.wait_for_selector(self.TEXT_UP_TO_0_15).click()
-        self.input_value_by_letter(self.INPUT_AIRCRAFT_IDENTIFICATION, '11111')
-        self.input_value_by_letter(self.INPUT_PILOT_LICENCE, 'N33')
-        self.page.wait_for_selector(self.INPUT_MODEL_BVS).fill('DJI-SUPERB')
-        self.page.locator(self.TEXT_NOT_FOUND).blur()
-        self.input_value_by_letter(self.INPUT_OPR, 'AEROBAZA')
-        self.input_value_by_letter(self.INPUT_MAX_FLIGHT_TIME, '0056')
-        self.page.wait_for_selector(self.INPUT_MAX_FLIGHT_RANGE_VALUE).fill('100')
-        self.page.wait_for_selector(self.BUTTON_MAX_FLIGHT_RANGE_UNIT).click()
-        self.page.wait_for_selector(self.TEXT_M).click()
-        self.page.wait_for_selector(self.INPUT_LEVEL_1_VALUE).fill('100')
-        self.page.wait_for_selector(self.BUTTON_LEVEL_1_UNIT).click()
-        self.page.wait_for_selector(self.TEXT_M_QNE).click()
-        self.page.wait_for_selector(self.INPUT_LEVEL_2_VALUE).fill('200')
-        self.page.wait_for_selector(self.BUTTON_LEVEL_2_UNIT).click()
-        self.page.wait_for_selector(self.TEXT_M_AMSL).click()
-        return self
-
-
-    def input_form_from_0_15_up_to_30_kg(self):
-
-        self.input_value_by_letter(self.INPUT_NAME, self.BLA_NAME)
-        self.input_value_by_letter(self.INPUT_WEIGHT_EXACT, '6')
-        self.page.wait_for_selector(self.SELECT_WEIGHT_CATEGORY).click()
-        self.page.wait_for_selector(self.TEXT_FROM_0_15_UP_TO_30).click()
-        self.input_value_by_letter(self.INPUT_REGISTRATION_NUMBER, '4444444')
-        self.input_value_by_letter(self.INPUT_SERIAL_NUMBER, '555')
-        self.input_value_by_letter(self.INPUT_PILOT_LICENCE, 'N55')
-        self.page.wait_for_selector(self.INPUT_MODEL_BVS).fill('DJI-MEDIUM')
-        self.page.locator(self.TEXT_NOT_FOUND).blur()
-        self.input_value_by_letter(self.INPUT_MAX_FLIGHT_TIME, '0500')
-        self.page.wait_for_selector(self.INPUT_MAX_FLIGHT_RANGE_VALUE).fill('99')
-        self.page.wait_for_selector(self.BUTTON_MAX_FLIGHT_RANGE_UNIT).click()
-        self.page.wait_for_selector(self.TEXT_KM).click()
-        self.page.wait_for_selector(self.INPUT_LEVEL_1_VALUE).fill('100')
-        self.page.wait_for_selector(self.BUTTON_LEVEL_1_UNIT).click()
-        self.page.wait_for_selector(self.TEXT_M_AMSL).click()
-        self.page.wait_for_selector(self.INPUT_LEVEL_2_VALUE).fill('200')
-        self.page.wait_for_selector(self.BUTTON_LEVEL_2_UNIT).click()
-        self.page.wait_for_selector(self.TEXT_M_AMSL).click()
-        return self
-
-    def input_form_more_than_30_kg(self):
-
-        self.input_value_by_letter(self.INPUT_NAME, self.BLA_NAME)
-        self.input_value_by_letter(self.INPUT_WEIGHT_EXACT, '32')
-        self.page.wait_for_selector(self.SELECT_WEIGHT_CATEGORY).click()
-        self.page.wait_for_selector(self.TEXT_MORE_THAN_30).click()
-        self.input_value_by_letter(self.INPUT_AIRCRAFT_IDENTIFICATION, '22222')
-        self.input_value_by_letter(self.INPUT_PILOT_LICENCE, 'N44')
-        self.page.wait_for_selector(self.INPUT_MODEL_BVS).fill('DJI-HEAVY')
-        self.page.locator(self.TEXT_NOT_FOUND).blur()
-        self.input_value_by_letter(self.INPUT_OPR, 'AEROBAZA')
-        self.input_value_by_letter(self.INPUT_MAX_FLIGHT_TIME, '0100')
-        self.page.wait_for_selector(self.INPUT_MAX_FLIGHT_RANGE_VALUE).fill('54')
-        self.page.wait_for_selector(self.BUTTON_MAX_FLIGHT_RANGE_UNIT).click()
-        self.page.wait_for_selector(self.TEXT_NM).click()
-        self.page.wait_for_selector(self.INPUT_LEVEL_1_VALUE).fill('123')
-        self.page.wait_for_selector(self.BUTTON_LEVEL_1_UNIT).click()
-        self.page.wait_for_selector(self.TEXT_M_QNE).click()
-        self.page.wait_for_selector(self.INPUT_LEVEL_2_VALUE).fill('456')
-        self.page.wait_for_selector(self.BUTTON_LEVEL_2_UNIT).click()
-        self.page.wait_for_selector(self.TEXT_M_QNE).click()
-        return self
-
     def click_save_button(self):
-        self.page.wait_for_selector(self.BUTTON_SAVE).click()
-        expect(self.page.get_by_text(self.POP_UP_SAVE_BLA)).to_be_visible()
+        self.button_save.click()
+        expect(self.pop_up_save_bla).to_be_visible()
+        return self
+
+    def check_title_grid_page(self):
         expect(self.page).to_have_title('СППИ - Воздушные суда - БВС - Список')
         return self
 
-    def check_created_bla(self):
-        expect(self.page.locator(self.BLA_IN_LIST)).to_be_visible()
+    def check_created_bla(self, bla_name):
+        expect(self.page.get_by_title(bla_name)).to_be_visible()
         return self

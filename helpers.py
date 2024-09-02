@@ -55,3 +55,35 @@ def make_cokies(access_token, refresh_token):
 
 def random_string(lenght=10):
     return "".join([random.choice(string.ascii_letters) for _ in range(lenght)])
+
+
+def category_up_to_0_15():
+    return 'до 0,15 кг'
+
+
+def category_from_0_15_up_to_30():
+    return 'от 0,15 до 30 кг'
+
+
+def category_more_than_30():
+    return 'более 30 кг'
+
+
+def level_unit_m_qne():
+    return 'M/QNE'
+
+
+def level_unit_m_amsl():
+    return 'M/AMSL'
+
+
+def flight_range_unit_m():
+    return 'М'
+
+
+def flight_range_unit_km():
+    return 'КМ'
+
+
+def flight_range_unit_nm():
+    return 'NM'
