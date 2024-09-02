@@ -13,8 +13,12 @@ class BlaPage(BasePage):
     INPUT_WEIGHT_EXACT = '//input[@type="number" and @formcontrolname="value"]'
     SELECT_WEIGHT_CATEGORY = '//div[@class="mat-select-arrow-wrapper ng-tns-c60-5"]'
     TEXT_UP_TO_0_15 = '//span[text()=" до 0,15 кг "]'
-    INPUT_REGISTRATION_NUMBER = '//input[@formcontrolname = "aircraftIdentification"]'
+    TEXT_FROM_0_15_UP_TO_30 = '//span[text()=" от 0,15 до 30 кг "]'
+    TEXT_MORE_THAN_30 = '//span[text()=" более 30 кг "]'
+    INPUT_AIRCRAFT_IDENTIFICATION = '//input[@formcontrolname = "aircraftIdentification"]'
     INPUT_PILOT_LICENCE = '//input[@formcontrolname = "remotePilotLicence"]'
+    INPUT_REGISTRATION_NUMBER = '//input[@formcontrolname = "registrationNumber"]'
+    INPUT_SERIAL_NUMBER = '//input[@formcontrolname = "serialNumber"]'
     INPUT_MODEL_BVS = '//input[@class="mat-input-element border-0 position-absolute ng-untouched ng-pristine ng-valid"]'
     INPUT_OPR = '//input[@formcontrolname = "opr"]'
     TEXT_NOT_FOUND = '//span[text()=" Не найдено "]'
@@ -22,6 +26,8 @@ class BlaPage(BasePage):
     INPUT_MAX_FLIGHT_RANGE_VALUE = '//input[@class="mat-input-element mat-form-field-autofill-control ng-tns-c49-10 ng-untouched ng-pristine ng-valid cdk-text-field-autofill-monitored"]'
     BUTTON_MAX_FLIGHT_RANGE_UNIT = '//div[@class="mat-form-field-suffix ng-tns-c49-10 ng-star-inserted"]//button'
     TEXT_M = '//button[text()=" М "]'
+    TEXT_KM = '//button[text()=" КМ "]'
+    TEXT_NM = '//button[text()=" NM "]'
     INPUT_LEVEL_1_VALUE = '//label[@class="mat-form-field-label ng-tns-c49-11 mat-empty mat-form-field-empty ng-star-inserted"]'
     BUTTON_LEVEL_1_UNIT = '//div[@class="mat-form-field-suffix ng-tns-c49-11 ng-star-inserted"]//button'
     TEXT_M_QNE = '//button[text()=" M/QNE "]'
@@ -43,7 +49,7 @@ class BlaPage(BasePage):
         self.input_value_by_letter(self.INPUT_WEIGHT_EXACT, '0.1')
         self.page.wait_for_selector(self.SELECT_WEIGHT_CATEGORY).click()
         self.page.wait_for_selector(self.TEXT_UP_TO_0_15).click()
-        self.input_value_by_letter(self.INPUT_REGISTRATION_NUMBER, '11111')
+        self.input_value_by_letter(self.INPUT_AIRCRAFT_IDENTIFICATION, '11111')
         self.input_value_by_letter(self.INPUT_PILOT_LICENCE, 'N33')
         self.page.wait_for_selector(self.INPUT_MODEL_BVS).fill('DJI-SUPERB')
         self.page.locator(self.TEXT_NOT_FOUND).blur()
@@ -60,6 +66,53 @@ class BlaPage(BasePage):
         self.page.wait_for_selector(self.TEXT_M_AMSL).click()
         return self
 
+
+    def input_form_from_0_15_up_to_30_kg(self):
+
+        self.input_value_by_letter(self.INPUT_NAME, self.BLA_NAME)
+        self.input_value_by_letter(self.INPUT_WEIGHT_EXACT, '6')
+        self.page.wait_for_selector(self.SELECT_WEIGHT_CATEGORY).click()
+        self.page.wait_for_selector(self.TEXT_FROM_0_15_UP_TO_30).click()
+        self.input_value_by_letter(self.INPUT_REGISTRATION_NUMBER, '4444444')
+        self.input_value_by_letter(self.INPUT_SERIAL_NUMBER, '555')
+        self.input_value_by_letter(self.INPUT_PILOT_LICENCE, 'N55')
+        self.page.wait_for_selector(self.INPUT_MODEL_BVS).fill('DJI-MEDIUM')
+        self.page.locator(self.TEXT_NOT_FOUND).blur()
+        self.input_value_by_letter(self.INPUT_MAX_FLIGHT_TIME, '0500')
+        self.page.wait_for_selector(self.INPUT_MAX_FLIGHT_RANGE_VALUE).fill('99')
+        self.page.wait_for_selector(self.BUTTON_MAX_FLIGHT_RANGE_UNIT).click()
+        self.page.wait_for_selector(self.TEXT_KM).click()
+        self.page.wait_for_selector(self.INPUT_LEVEL_1_VALUE).fill('100')
+        self.page.wait_for_selector(self.BUTTON_LEVEL_1_UNIT).click()
+        self.page.wait_for_selector(self.TEXT_M_AMSL).click()
+        self.page.wait_for_selector(self.INPUT_LEVEL_2_VALUE).fill('200')
+        self.page.wait_for_selector(self.BUTTON_LEVEL_2_UNIT).click()
+        self.page.wait_for_selector(self.TEXT_M_AMSL).click()
+        return self
+
+    def input_form_more_than_30_kg(self):
+
+        self.input_value_by_letter(self.INPUT_NAME, self.BLA_NAME)
+        self.input_value_by_letter(self.INPUT_WEIGHT_EXACT, '32')
+        self.page.wait_for_selector(self.SELECT_WEIGHT_CATEGORY).click()
+        self.page.wait_for_selector(self.TEXT_MORE_THAN_30).click()
+        self.input_value_by_letter(self.INPUT_AIRCRAFT_IDENTIFICATION, '22222')
+        self.input_value_by_letter(self.INPUT_PILOT_LICENCE, 'N44')
+        self.page.wait_for_selector(self.INPUT_MODEL_BVS).fill('DJI-HEAVY')
+        self.page.locator(self.TEXT_NOT_FOUND).blur()
+        self.input_value_by_letter(self.INPUT_OPR, 'AEROBAZA')
+        self.input_value_by_letter(self.INPUT_MAX_FLIGHT_TIME, '0100')
+        self.page.wait_for_selector(self.INPUT_MAX_FLIGHT_RANGE_VALUE).fill('54')
+        self.page.wait_for_selector(self.BUTTON_MAX_FLIGHT_RANGE_UNIT).click()
+        self.page.wait_for_selector(self.TEXT_NM).click()
+        self.page.wait_for_selector(self.INPUT_LEVEL_1_VALUE).fill('123')
+        self.page.wait_for_selector(self.BUTTON_LEVEL_1_UNIT).click()
+        self.page.wait_for_selector(self.TEXT_M_QNE).click()
+        self.page.wait_for_selector(self.INPUT_LEVEL_2_VALUE).fill('456')
+        self.page.wait_for_selector(self.BUTTON_LEVEL_2_UNIT).click()
+        self.page.wait_for_selector(self.TEXT_M_QNE).click()
+        return self
+
     def click_save_button(self):
         self.page.wait_for_selector(self.BUTTON_SAVE).click()
         expect(self.page.get_by_text(self.POP_UP_SAVE_BLA)).to_be_visible()
@@ -68,5 +121,4 @@ class BlaPage(BasePage):
 
     def check_created_bla(self):
         expect(self.page.locator(self.BLA_IN_LIST)).to_be_visible()
-
-    # def delete_created_bla(self):
+        return self
