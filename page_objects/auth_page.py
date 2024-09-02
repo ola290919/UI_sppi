@@ -1,5 +1,6 @@
 import os
 import time
+from enum import Enum
 from threading import Lock
 
 import requests
@@ -23,12 +24,11 @@ class AuthToken(BaseModel):
 class AuthPage:
     session: requests.Session
     _base_url: str
-    _url: str
-    _query: dict
     _instance = None
     _lock = Lock()
     _secret_key: str
     tokens: {AuthToken}
+    stend: str
 
     def __new__(cls, *args, **kwargs):
         with cls._lock:
@@ -41,8 +41,8 @@ class AuthPage:
         self.session = requests.Session()
         if not hasattr(self, '_initialized'):
             self._initialized = True
-            self._base_url = os.getenv('DEV_API_BASE_URL')
-            self.secret_key = os.getenv('DEV_API_SECRET_KEY')
+            self._base_url = os.getenv('RC_API_BASE_URL')
+            self.secret_key = os.getenv('RC_API_SECRET_KEY')
             if not self.secret_key:
                 raise Exception('SPPI_API_SECRET_KEY not set')
             self.tokens = {}
@@ -99,7 +99,7 @@ class AuthPage:
                 self.tokens[login] = {
                     'access_token': response.access_token,
                     'refresh_token': response.refresh_token,
-                    'expiry_time': time.time() + float(os.getenv('DEV_REFRESH_TOKEN_EXPIRE_MINUTES')) * 60
+                    'expiry_time': time.time() + float(os.getenv('REFRESH_TOKEN_EXPIRE_MINUTES')) * 60
                 }
 
                 return self.tokens[login]['access_token']
@@ -110,24 +110,65 @@ class AuthPage:
         self.tokens[login] = {
             'access_token': response.access_token,
             'refresh_token': response.refresh_token,
-            'expiry_time': time.time() + float(os.getenv('DEV_REFRESH_TOKEN_EXPIRE_MINUTES')) * 60
+            'expiry_time': time.time() + float(os.getenv('REFRESH_TOKEN_EXPIRE_MINUTES')) * 60
         }
 
         return (self.tokens[login]['access_token'], self.tokens[login]['refresh_token'])
 
-    def as_admin(self):
+    def admin_tokens(self):
 
-        return self.get_access_refresh_token(os.getenv('DEV_ADMIN_USER'), os.getenv('DEV_ADMIN_PASSWORD'))
+        return self.get_access_refresh_token(os.getenv('RC_ADMIN_USER'), os.getenv('RC_ADMIN_PASSWORD'))
 
-    def as_pilot(self):
-        return self.get_access_refresh_token(os.getenv('DEV_PILOT_USER'), os.getenv('DEV_PILOT_PASSWORD'))
+    def pilot_tokens(self):
+        return self.get_access_refresh_token(os.getenv('RC_PILOT_USER'), os.getenv('RC_PILOT_PASSWORD'))
 
-# auth = AuthPage()
-#
-# class Auth(Enum):
-#     ADMIN = 1
-#
-#     def go(self):
-#         methods = {
-#             self.ADMIN: auth.as_admin
-#         }
+    @staticmethod
+    def get_auth_payload(login: str, password: str):
+        url = f'{os.getenv('BASE_URL_RC')}/user-service/tokens'
+        headers = {
+            'captcha': 'skip-captcha',
+            'skip-captcha': 'true'
+        }
+        data = {
+            'login': login,
+            'password': password
+        }
+        response = requests.post(url, json=data, headers=headers)
+        response.raise_for_status()
+        data = response.json()
+        if not data.get('access_payload') or not data.get('refresh_payload'):
+            raise ValueError('No access or refresh payload in tokens response. Returned data: ' + json.dumps(data))
+
+        return [data['access_payload'], data['refresh_payload']]
+
+    def admin_payload(self):
+
+        return self.get_auth_payload(os.getenv('RC_ADMIN_USER'), os.getenv('RC_ADMIN_PASSWORD'))
+
+    def pilot_payload(self):
+
+        return self.get_auth_payload(os.getenv('RC_PILOT_USER'), os.getenv('RC_PILOT_PASSWORD'))
+
+
+auth = AuthPage()
+
+
+class As(Enum):
+    ADMIN = 1
+    PILOT = 2
+
+    def tokens(self):
+        methods = {
+            self.ADMIN: auth.admin_tokens,
+            self.PILOT: auth.pilot_tokens
+        }
+
+        return methods[self]()
+
+    def payload(self):
+        methods = {
+            self.ADMIN: auth.admin_payload,
+            self.PILOT: auth.pilot_payload
+        }
+
+        return methods[self]()

@@ -1,20 +1,12 @@
 """
-Фикстура для проекта
+Фикстуры для проекта
 """
-from typing import Dict
-import datetime
-
-import allure
-import pytest
-import requests
-from _pytest.fixtures import FixtureRequest
-from _pytest.nodes import Item
-from playwright.sync_api import Page, Playwright
-from playwright.sync_api import sync_playwright
+import json
 
 import pytest
-from page_objects.auth_page import AuthPage
-
+from helpers import make_storage_state_data, make_cokies
+from page_objects.auth_page import As
+from playwright.sync_api import Page
 
 
 # @pytest.fixture(autouse=True)
@@ -46,61 +38,24 @@ from page_objects.auth_page import AuthPage
 
 
 @pytest.fixture()
-def auth_admin(playwright, page: Page):
+def auth(playwright, page: Page):
+    browser = playwright.chromium.launch(headless=False)
 
-    browser = playwright.chromium.launch(channel="chrome", headless=False)
-    access_token, refresh_token = AuthPage().as_admin()
-    context = browser.new_context()
-    expires = int((datetime.datetime.now() + datetime.timedelta(minutes=3)).timestamp())
-    context.add_cookies([{'name': 'refresh_token',
-                          'value': refresh_token,
-                          'path': '/',
-                          'domain': 'http://app.sppi.dev.plan',
-                          'httpOnly': True,
-                          'secure': False,
-                          'sameSite': 'Strict',
-                          'expires': expires
-                          },
-                         {'name': 'authorization',
-                          'value': access_token,
-                          'path': '/',
-                          'domain': 'http://app.sppi.dev.plan',
-                          'httpOnly': True,
-                          'secure': False,
-                          'sameSite': 'Strict',
-                          'expires': expires
-                          }])
-    page = context.new_page()
-    yield page
-    page.close()
-    browser.close()
+    class AuthorizedPage:
+        def wrapper(self, auth_type: As):
+            access_token, refresh_token = auth_type.tokens()
+            access_payload, refresh_payload = auth_type.payload()
+            storage_state_data = make_storage_state_data(access_payload, refresh_payload)
+            with open("state.json", "w") as f:
+                json.dump({"origins": [storage_state_data]}, f)
+            context = browser.new_context(storage_state="state.json")
+            cookies = make_cokies(access_token, refresh_token)
+            context.add_cookies(cookies)
+            page = context.new_page()
+            return page
 
-@pytest.fixture()
-def auth_pilot(playwright, page: Page):
+    page = AuthorizedPage()
 
-    browser = playwright.chromium.launch(channel="chrome", headless=False)
-    access_token, refresh_token = AuthPage().as_pilot()
-    context = browser.new_context()
-    expires = int((datetime.datetime.now() + datetime.timedelta(minutes=3)).timestamp())
-    context.add_cookies([{'name': 'refresh_token',
-                          'value': refresh_token,
-                          'path': '/',
-                          'domain': 'http://app.sppi.dev.plan',
-                          'httpOnly': True,
-                          'secure': False,
-                          'sameSite': 'Strict',
-                          'expires': expires
-                          },
-                         {'name': 'authorization',
-                          'value': access_token,
-                          'path': '/',
-                          'domain': 'http://app.sppi.dev.plan',
-                          'httpOnly': True,
-                          'secure': False,
-                          'sameSite': 'Strict',
-                          'expires': expires
-                          }])
-    page = context.new_page()
-    yield page
-    page.close()
+    yield page.wrapper
+
     browser.close()
