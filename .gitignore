@@ -162,17 +162,10 @@ cython_debug/
 .env
 .idea/
 __pycache__/
-anpa_venv/
-api_clients/__pycache__/
-data/__pycache__/
-data/data_airspace/__pycache__/
-data/data_airspace_sector/__pycache__/
-delete_autoproject.py
+page_objects/__pycache__/
 models/__pycache__/
 tests/__pycache__/
-examples.py
 
-
-/allure-results/
-/tests/allure-results/
-/tests/state.json
+allure-results/
+tests/allure-results/
+tests/state.json
