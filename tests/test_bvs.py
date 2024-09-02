@@ -19,7 +19,7 @@ class TestBlaCreate():
         bla.input_name.press_sequentially(bla_name)
         bla.input_weight_exact.fill('0.1')
         bla.choose_weight_category(category_up_to_0_15())
-        bla.aircraft_identification.fill('1111111')
+        bla.aircraft_identification.fill('11111')
         bla.pilot_licence.fill('N33')
         bla.model_bvs.fill('DJI-SUPERB')
         bla.field_text_not_found.blur()
