@@ -169,3 +169,4 @@ tests/__pycache__/
 allure-results/
 tests/allure-results/
 tests/state.json
+state.json
