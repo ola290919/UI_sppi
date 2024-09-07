@@ -4,28 +4,39 @@
 import json
 
 import pytest
+import requests
 from helpers import make_storage_state_data, make_cokies
 from page_objects.auth_page import As
 from playwright.sync_api import Page
 
 
-# @pytest.fixture(autouse=True)
-# def attach_playwright_results(page: Page, request: FixtureRequest):
-#     """Fixture to perform teardown actions and attach results to Allure report
-#     on failure.
-#     """
-#     yield
-#     if request.node.rep_call.failed:
-#         allure.attach(
-#             body=page.url,
-#             name="URL",
-#             attachment_type=allure.attachment_type.URI_LIST,
-#         )
-#         allure.attach(
-#             page.screenshot(full_page=True),
-#             name="Screen shot on failure",
-#             attachment_type=allure.attachment_type.PNG,
-#         )
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    rep = outcome.get_result()
+    if rep.outcome != 'passed':
+        item.status = 'failed'
+    else:
+        item.status = 'passed'
+
+
+@pytest.fixture(autouse=True)
+def attach_playwright_results(page: Page, request):
+    """Fixture to perform teardown actions and attach results to Allure report
+    on failure.
+    """
+    yield
+    if request.node.status == 'failed':
+        allure.attach(
+            body=page.url,
+            name="URL",
+            attachment_type=allure.attachment_type.URI_LIST,
+        )
+        allure.attach(
+            page.screenshot(full_page=True),
+            name="Screen shot on failure",
+            attachment_type=allure.attachment_type.PNG,
+        )
 
 
 # @pytest.hookimpl(tryfirst=True, hookwrapper=True)

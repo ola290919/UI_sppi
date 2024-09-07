@@ -18,6 +18,9 @@
 
 Загрузить все необходимые пакеты через ```pip install -r requirements.txt```.
 
+```pip install playwright```
+```playwright install```
+
 Необходимые для запуска проекта переменные указаны в файле ```.env.example```.
 
 Конфигурация запуска тестов в файле ```pytest.ini```.
