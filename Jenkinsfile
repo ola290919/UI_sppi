@@ -7,7 +7,6 @@ pipeline {
     environment {
         GIT_REPO = 'https://github.com/ola290919/UI_sppi.git'
         ALLURE_RESULTS = 'allure-results'
-//         EXECUTOR_URL = "${params.EXECUTOR_URL}"
         BROWSER = "${params.BROWSER}"
         NUMPROCESS = "${params.NUMPROCESS}"
     }
@@ -25,7 +24,7 @@ pipeline {
                 . venv/bin/activate
                 pip install --no-cache-dir virtualenv
                 pip3 install -r requirements.txt
-                pip install playwright
+                pip3 install playwright
                 playwright install
                 pytest --browser ${BROWSER}  --numprocesses ${NUMPROCESS} --alluredir ${ALLURE_RESULTS}
                 '''
