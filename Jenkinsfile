@@ -21,6 +21,7 @@ pipeline {
              withCredentials([file(credentialsId:'env_ms',variable:'ENV_MS')]){
               catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                 sh '''
+                #!/bin/bash
                 python3 -m venv venv
                 . venv/bin/activate
                 pip3 install -r requirements.txt
