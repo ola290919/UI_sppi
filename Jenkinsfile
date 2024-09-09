@@ -19,16 +19,13 @@ pipeline {
         }
         stage('Install dependencies for tests') {
             steps {
-             withCredentials([string(credentialsId:'envtxt',variable:'ENV_MS')]){
+             withCredentials([file(credentialsId:'envfile',variable:'ENV_MS')]){
               catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                 sh '''
                 ##python3 -m venv venv
                 #. venv/bin/activate
                 #pip3 install -r requirements.txt
-                cat << EOF > env
-                ${ENV_MS}
-                EOF
-                source env
+                source ${ENV_MS}
                 #SELENIUM_REMOTE_URL="http://10.0.1.17:4444" pytest --br ${BROWSER}  --numprocesses ${NUMPROCESS} --alluredir ${ALLURE_RESULTS}
                 '''
               }
