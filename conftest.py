@@ -4,10 +4,12 @@
 import json
 
 import pytest
-import requests
-from helpers import make_storage_state_data, make_cokies
-from page_objects.auth_page import As
-from playwright.sync_api import Page
+import allure
+from utils.auth_helpers import make_storage_state_data, make_cokies
+from utils.sppi_auth_client import As
+from utils.sppi_api_client import SppiApiClient
+from playwright.sync_api import Page, BrowserType
+from page_objects.shr_message_page import ShrMessagePage
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -38,19 +40,17 @@ def attach_playwright_results(page: Page, request):
             attachment_type=allure.attachment_type.PNG,
         )
 
-
-# @pytest.hookimpl(tryfirst=True, hookwrapper=True)
-# def pytest_runtest_makereport(item: Item):
-#     """Hook implementation to generate test report for each test phase.
-#     """
-#     outcome = yield
-#     rep = outcome.get_result()
-#     setattr(item, f"rep_{rep.when}", rep)
-
+def pytest_addoption(parser):
+    parser.addoption("--launch_mode", default="remote", choices=["remote", "local"])
+    parser.addoption("--br", action="store", default="ch", choices=["ch", "ff"])
 
 @pytest.fixture()
-def auth(playwright, page: Page):
-    browser = playwright.chromium.launch(headless=False)
+def auth(playwright, page: Page, request):
+    browser_name = request.config.getoption("--br")
+    if browser_name == "ch":
+        browser = playwright.chromium.launch(headless=False)
+    elif  browser_name == "ff":
+        browser = playwright.firefox.launch(headless=False)
 
     class AuthorizedPage:
 
@@ -78,3 +78,31 @@ def auth(playwright, page: Page):
     page.close_context
 
     browser.close()
+
+@pytest.fixture(scope="function")
+def name_of_sent_shr():
+    api_client = SppiApiClient()
+    id_shr, name_shr = api_client.get_created_shr_id_name()
+    api_client.send_created_shr(id_shr)
+    return name_shr
+
+@pytest.fixture(scope="function")
+def name_of_ack_shr():
+    api_client = SppiApiClient()
+    id_shr, name_shr = api_client.get_created_shr_id_name()
+    api_client.send_created_shr(id_shr)
+    api_client.ack_message_for_shr(id_shr)
+    return name_shr
+
+@pytest.fixture(scope="function")
+def name_of_dep_shr():
+    api_client = SppiApiClient()
+    id_shr, name_shr = api_client.get_created_shr_id_name()
+    api_client.send_created_shr(id_shr)
+    api_client.ack_message_for_shr(id_shr)
+    api_client.dep_message_for_shr(id_shr)
+    return name_shr
+
+
+
+

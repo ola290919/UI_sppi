@@ -1,62 +1,24 @@
-import datetime
-import json
-import os
 import random
 import string
-from enum import Enum
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
-
-def make_storage_state_data(access_payload, refresh_payload):
-    data = {
-        "origin": os.getenv("BASE_URL_RC"),
-        "localStorage": [
-            {
-                "name": "sppi6_client_auth",
-                "value": json.dumps({
-                    "access_token_payload": access_payload,
-                    "refresh_token_payload": refresh_payload,
-                    "refresh_in_progress": False
-                })
-            }
-        ]
-    }
-    return data
-
-
-def make_cokies(access_token, refresh_token):
-    expires = int((datetime.datetime.now() + datetime.timedelta(minutes=3)).timestamp())
-    data = ([
-        {
-            'name': 'refresh_token',
-            'value': refresh_token,
-            'path': '/',
-            'domain': str(os.getenv("BASE_URL_RC")).replace('http://', '.'),
-            'httpOnly': True,
-            'secure': False,
-            'sameSite': 'Strict',
-            'expires': expires
-        },
-        {
-            'name': 'authorization',
-            'value': access_token,
-            'path': '/',
-            'domain': str(os.getenv("BASE_URL_RC")).replace('http://', '.'),
-            'httpOnly': True,
-            'secure': False,
-            'sameSite': 'Strict',
-            'expires': expires
-        }
-    ])
-    return data
+import allure
+from playwright.sync_api import expect, Locator
 
 
 def random_string(lenght=10):
     return "".join([random.choice(string.ascii_letters) for _ in range(lenght)])
 
+
+@allure.step("Заполнить поле {locator} значением {value}")
+def fill_and_check_value(locator: Locator, value: str):
+    locator.fill(value)
+    expect(locator).to_have_value(value)
+
+
+@allure.step("Заполнить временное поле {locator} значением {hh}:{mm}")
+def fill_and_check_value_time(locator, hh: str, mm: str):
+    locator.fill(hh + mm)
+    expect(locator).to_have_value(hh + ':' + mm)
 
 class Weight:
 
@@ -95,6 +57,7 @@ class Unit:
     def nm():
         return 'NM'
 
+
 class FlightRules:
     def i():
         return 'I ППП'
@@ -107,6 +70,7 @@ class FlightRules:
 
     def z():
         return 'Z ПВП/ППП'
+
 
 class FlightType:
     def s():
@@ -124,6 +88,7 @@ class FlightType:
     def x():
         return 'X прочее'
 
+
 class TurbulenceCat:
     def h():
         return 'H от 136000 до 500000 кг'
@@ -137,6 +102,7 @@ class TurbulenceCat:
     def l():
         return 'L до 7000 кг'
 
+
 class FplType:
     def vs_flight():
         return 'Полёт воздушного судна'
@@ -146,3 +112,23 @@ class FplType:
 
     def utp_area():
         return 'УТП с площадок'
+
+
+class FlightStatus:
+    def sent():
+        return 'На обработке'
+
+    def ack():
+        return 'Принят'
+
+    def rej():
+        return 'Отвергнут'
+
+    def cnl():
+        return 'Отменен'
+
+    def dep():
+        return 'В полёте'
+
+    def arr():
+        return 'Выполнен'

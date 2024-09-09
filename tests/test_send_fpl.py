@@ -1,6 +1,6 @@
 import allure
-from helpers import FlightRules, FlightType, TurbulenceCat, Unit, FplType
-from page_objects.auth_page import As
+from utils.pw_helpers import FlightRules, FlightType, TurbulenceCat, Unit, FplType
+from utils.sppi_auth_client import As
 from page_objects.fpl_page import FplPage
 from playwright.sync_api import expect
 
@@ -12,17 +12,17 @@ class TestSendFpl:
         fpl.go_create_fpl_page()
         fpl.close_confirm_modal()
         fpl.choose_fpl_type(FplType.utp_ad())
-        fpl.input_reg_number.press_sequentially('04927')
+        fpl.fill_reg_number('04927')
         fpl.choose_flight_rules(FlightRules.i()).choose_flight_type((FlightType.x()))
         fpl.fill_aircraft_type('MI8')
-        fpl.choose_turbulence_cat(TurbulenceCat.m()).input_equipment.fill('ADE3T/HB2')
+        fpl.choose_turbulence_cat(TurbulenceCat.m()).fill_equipment('ADE3T/HB2')
         fpl.fill_aerodrome_dep('XUBW').input_desc_time.clear()
-        fpl.input_desc_time.fill('0400')
-        fpl.choose_level_unit(Unit.m_amsl()).input_level_value.fill('4500')
+        fpl.fill_desc_time('04', '00')
+        fpl.choose_level_unit(Unit.m_amsl()).fill_level_value('4500')
         fpl.button_specify_route.click()
         fpl.ok_button_in_information_modal.click()
-        fpl.textarea_route.press_sequentially('XUMH DCT UUMU')
-        fpl.fill_aerodrome_arr('UUMC').input_duration.fill('0050')
+        fpl.fill_route('XUMH DCT UUMU')
+        fpl.fill_aerodrome_arr('UUMC').fill_duration('00', '50')
         fpl.button_submit.dblclick()
         fpl.modal_diagnostic.is_visible()
         expect(fpl.text_fpl_in_diagnostic_modal).to_contain_text(
@@ -35,14 +35,14 @@ class TestSendFpl:
         fpl.go_create_fpl_page()
         fpl.close_confirm_modal()
         fpl.choose_fpl_type(FplType.utp_ad())
-        fpl.input_reg_number.press_sequentially('04927')
+        fpl.fill_reg_number('04927')
         fpl.choose_flight_rules(FlightRules.i()).choose_flight_type((FlightType.x()))
         fpl.fill_aircraft_type('MI8')
-        fpl.choose_turbulence_cat(TurbulenceCat.m()).input_equipment.fill('ADE3T/HB2')
+        fpl.choose_turbulence_cat(TurbulenceCat.m()).fill_equipment('ADE3T/HB2')
         fpl.fill_aerodrome_dep('UUBW').input_desc_time.clear()
-        fpl.input_desc_time.press_sequentially('0400')
-        fpl.choose_level_unit(Unit.m_amsl()).input_level_value.fill('4500')
-        fpl.fill_aerodrome_arr('UUBW').input_duration.fill('0020')
+        fpl.fill_desc_time('04', '00')
+        fpl.choose_level_unit(Unit.m_amsl()).fill_level_value('4500')
+        fpl.fill_aerodrome_arr('UUBW').fill_duration('00', '20')
         fpl.button_submit.dblclick()
         fpl.modal_diagnostic.is_visible()
         expect(fpl.text_fpl_in_diagnostic_modal).to_contain_text(

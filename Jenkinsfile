@@ -24,9 +24,7 @@ pipeline {
                 . venv/bin/activate
                 pip install --no-cache-dir virtualenv
                 pip3 install -r requirements.txt
-                pip3 install playwright
-                playwright install
-                pytest --browser ${BROWSER}  --numprocesses ${NUMPROCESS} --alluredir ${ALLURE_RESULTS}
+                SELENIUM_REMOTE_URL="http://10.0.1.17:4444" pytest --br ${BROWSER}  --numprocesses ${NUMPROCESS} --alluredir ${ALLURE_RESULTS}
                 '''
               }
             }
