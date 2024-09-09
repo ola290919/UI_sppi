@@ -22,7 +22,7 @@ pipeline {
                 sh '''
                 python3 -m venv venv
                 . venv/bin/activate
-                pip install --no-cache-dir virtualenv
+                pip install --upgrade pip
                 pip3 install -r requirements.txt
                 SELENIUM_REMOTE_URL="http://10.0.1.17:4444" pytest --br ${BROWSER}  --numprocesses ${NUMPROCESS} --alluredir ${ALLURE_RESULTS}
                 '''
