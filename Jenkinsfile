@@ -19,7 +19,7 @@ pipeline {
         }
         stage('Install dependencies for tests') {
             steps {
-             withCredentials([file(credentialsId:'envtext',variable:'ENV_MS')]){
+             withCredentials([file(credentialsId:'envtxt',variable:'ENV_MS')]){
               catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                 sh '''
                 ##python3 -m venv venv
