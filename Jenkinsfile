@@ -5,6 +5,7 @@ pipeline {
         string(name: 'NUMPROCESS', defaultValue: '1', description: 'Number of processes')
     }
     environment {
+        SHELL = '/bin/bash'
         GIT_REPO = 'https://github.com/ola290919/UI_sppi.git'
         ALLURE_RESULTS = 'allure-results'
         BROWSER = "${params.BROWSER}"
@@ -21,17 +22,11 @@ pipeline {
              withCredentials([file(credentialsId:'env_ms',variable:'ENV_MS')]){
               catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                 sh '''
-                cat << EOF > test.sh
-                #!/bin/bash
                 python3 -m venv venv
                 . venv/bin/activate
                 pip3 install -r requirements.txt
-                source \${ENV_MS}
-                SELENIUM_REMOTE_URL="http://10.0.1.17:4444" pytest --br \${BROWSER}  --numprocesses \${NUMPROCESS} --alluredir \${ALLURE_RESULTS}
-                EOF
-                cat test.sh
-                chmod 755 test.sh
-                ./test.sh
+                source ${ENV_MS}
+                SELENIUM_REMOTE_URL="http://10.0.1.17:4444" pytest --br ${BROWSER}  --numprocesses ${NUMPROCESS} --alluredir ${ALLURE_RESULTS}
                 '''
               }
              }
