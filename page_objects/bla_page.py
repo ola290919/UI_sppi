@@ -1,7 +1,8 @@
 import os
+
 import allure
 from playwright.sync_api import expect, Page
-from utils.pw_helpers import  fill_and_check_value, fill_and_check_value_time
+from utils.pw_helpers import fill_and_check_value, fill_and_check_value_time
 
 
 class BlaPage:

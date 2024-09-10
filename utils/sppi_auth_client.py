@@ -1,5 +1,6 @@
+import datetime
+import json
 import os
-from enum import Enum
 from typing import Tuple
 
 import requests
@@ -88,16 +89,19 @@ class SppiAuthClient:
         response.raise_for_status()
         data = response.json()
         if not data.get('access_payload') or not data.get('refresh_payload'):
-            raise ValueError('No access or refresh payload in tokens response. Returned data: ' + json.dumps(data))
+            raise ValueError('No access or refresh payload in tokens response. '
+                             'Returned data: ' + json.dumps(data))
 
         return [data['access_payload'], data['refresh_payload']]
 
     def admin_tokens(self):
 
-        return self.get_access_refresh_token(os.getenv('RC_ADMIN_USER'), os.getenv('RC_ADMIN_PASSWORD'))
+        return self.get_access_refresh_token(os.getenv('RC_ADMIN_USER'),
+                                             os.getenv('RC_ADMIN_PASSWORD'))
 
     def pilot_tokens(self):
-        return self.get_access_refresh_token(os.getenv('RC_PILOT_USER'), os.getenv('RC_PILOT_PASSWORD'))
+        return self.get_access_refresh_token(os.getenv('RC_PILOT_USER'),
+                                             os.getenv('RC_PILOT_PASSWORD'))
 
     def atm_dispatcher_moscow_tokens(self):
         return self.get_access_refresh_token(os.getenv('RC_ATM_DISPATCHER_MOSCOW_USER'),
@@ -159,30 +163,3 @@ class SppiAuthClient:
             }
         ])
         return data
-
-
-auth = SppiAuthClient()
-
-
-class As(Enum):
-    ADMIN = 1
-    PILOT = 2
-    ATM_DISPATCHER_MOSCOW = 3
-
-    def tokens(self):
-        methods = {
-            self.ADMIN: auth.admin_tokens,
-            self.PILOT: auth.pilot_tokens,
-            self.ATM_DISPATCHER_MOSCOW: auth.atm_dispatcher_moscow_tokens
-        }
-
-        return methods[self]()
-
-    def payload(self):
-        methods = {
-            self.ADMIN: auth.admin_payload,
-            self.PILOT: auth.pilot_payload,
-            self.ATM_DISPATCHER_MOSCOW: auth.atm_dispatcher_moscow_payload
-        }
-
-        return methods[self]()

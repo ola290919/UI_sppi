@@ -1,6 +1,6 @@
 import os
-import allure
 
+import allure
 from playwright.sync_api import expect, Page
 from utils.pw_helpers import fill_and_check_value, fill_and_check_value_time
 

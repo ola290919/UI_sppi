@@ -14,11 +14,29 @@
 
 Генерация отчета allure ```C:\Users\mx\Downloads\allure-2.29.0\allure-2.29.0\bin\allure.bat generate allure-results --clean```
 
-Установка переменной ```$Env:JAVA_HOME = "C:\Program Files\Java\jre1.8.0_421"```
+Установка переменной java ```$Env:JAVA_HOME = "C:\Program Files\Java\jre1.8.0_421"```
 
 ## Запуск
 
+Запуск локально:
+
 `pytest`
+
+Запуск удаленно: 
+
+- запустить Selenium Grid из директории с selenium-server-4.20.0.jar
+
+`java -jar .\selenium-server-4.20.0.jar standalone`  
+
+- установить переменную в проекте
+
+`$Env:SELENIUM_REMOTE_URL="http://10.0.1.17:4444"` 
+
+- запустить тесты
+
+`pytest`
+
+Запуск в jenkins через jenkinsfile
 
 ### Структура
 
@@ -53,7 +71,5 @@
 [Класс SppiApiClient](utils/sppi_api_client.py) используется для обращения к API СППИ при формировании данных авторизации, а также формирования `set up` в фикстурах для тестирования.
 
 #### helpers
-
-В [файле auth_helpers](utils/pw_helpers.py) находятся функции для формирования данных авторизации.
 
 В [файле pw_helpers](utils/pw_helpers.py) находятся функции и классы для работы с Playwright.
