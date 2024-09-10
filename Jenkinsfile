@@ -1,14 +1,12 @@
 pipeline {
     agent any
     parameters {
-        string(name: 'BROWSER', defaultValue: 'chrome', description: 'Browser name')
+        string(name: 'BROWSER', defaultValue: 'ch', description: 'Browser name')
         string(name: 'NUMPROCESS', defaultValue: '1', description: 'Number of processes')
     }
     environment {
-        SHELL = '/bin/bash'
         GIT_REPO = 'https://github.com/ola290919/UI_sppi.git'
         ALLURE_RESULTS = 'allure-results'
-        BROWSER = "${params.BROWSER}"
         NUMPROCESS = "${params.NUMPROCESS}"
     }
     stages {
@@ -26,7 +24,7 @@ pipeline {
                 . venv/bin/activate
                 pip3 install -r requirements.txt
                 cp ${ENV_MS} .env
-                SELENIUM_REMOTE_URL="http://10.0.1.17:4444" pytest --br ${BROWSER}  --numprocesses ${NUMPROCESS} --alluredir ${ALLURE_RESULTS}
+                SELENIUM_REMOTE_URL="http://10.0.1.17:4444" pytest --numprocesses ${NUMPROCESS} --alluredir ${ALLURE_RESULTS}
                 rm -f .env
                 '''
               }

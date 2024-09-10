@@ -1,13 +1,13 @@
 import allure
-from utils.pw_helpers import random_string, Weight, Unit
-from utils.sppi_auth_client import As
 from page_objects.bla_page import BlaPage
+from utils.pw_helpers import random_string, Weight, Unit
 
 
 class TestCreateBla:
-    @allure.feature('')
-    def test_bla_up_to_0_15(self, auth):
-        bla = BlaPage(auth(As.PILOT))
+
+    @allure.feature('BLA')
+    def test_bla_up_to_0_15(self, pilot_page):
+        bla = BlaPage(pilot_page)
         bla_name = random_string() + ' Test light'
         bla.go_create_bla_page()
         bla.fill_name(bla_name)
@@ -23,8 +23,9 @@ class TestCreateBla:
         bla.choose_level_2_unit(Unit.m_amsl()).fill_level_2_value('200')
         bla.click_save_button().check_title_grid_page().check_created_bla(bla_name)
 
-    def test_create_bla_from_0_15_up_to_30(self, auth):
-        bla = BlaPage(auth(As.PILOT))
+    @allure.feature('BLA')
+    def test_create_bla_from_0_15_up_to_30(self, pilot_page):
+        bla = BlaPage(pilot_page)
         bla_name = random_string() + ' Test medium'
         bla.go_create_bla_page()
         bla.fill_name(bla_name)
@@ -40,8 +41,9 @@ class TestCreateBla:
         bla.choose_level_2_unit(Unit.m_amsl()).fill_level_2_value('200')
         bla.click_save_button().check_title_grid_page().check_created_bla(bla_name)
 
-    def test_bla_more_than_30(self, auth):
-        bla = BlaPage(auth(As.PILOT))
+    @allure.feature('BLA')
+    def test_bla_more_than_30(self, pilot_page):
+        bla = BlaPage(pilot_page)
         bla_name = random_string() + ' Test heavy'
         bla.go_create_bla_page()
         bla.fill_name(bla_name)

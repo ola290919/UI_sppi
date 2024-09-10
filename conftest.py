@@ -3,13 +3,12 @@
 """
 import json
 
-import pytest
 import allure
+import pytest
+from playwright.sync_api import Page
 from utils.auth_helpers import make_storage_state_data, make_cokies
-from utils.sppi_auth_client import As
 from utils.sppi_api_client import SppiApiClient
-from playwright.sync_api import Page, sync_playwright
-from page_objects.shr_message_page import ShrMessagePage
+from utils.sppi_auth_client import SppiAuthClient
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -21,64 +20,79 @@ def pytest_runtest_makereport(item, call):
     else:
         item.status = 'passed'
 
+@pytest.fixture(scope="session")
+def browser(request, playwright):
+    browser = playwright.chromium.launch(headless=False, args=["--maximized"])
+    yield browser
+    browser.close()
 
-@pytest.fixture(autouse=True)
-def attach_playwright_results(request):
-    """Fixture to perform teardown actions and attach results to Allure report
-    on failure.
-    """
-    yield
-    page: Page
+@pytest.fixture(scope="session")
+def pilot_context(browser, request):
+    sppi_auth_client = SppiAuthClient()
+    access_token, refresh_token = sppi_auth_client.pilot_tokens()
+    access_payload, refresh_payload = sppi_auth_client.pilot_payload()
+    storage_state_data = make_storage_state_data(access_payload, refresh_payload)
+    with open("state.json", "w") as f:
+        json.dump({"origins": [storage_state_data]}, f)
+    cookies = make_cokies(access_token, refresh_token)
+    context = browser.new_context(storage_state="state.json")
+    context.add_cookies(cookies)
+    yield context
+    context.close()
+
+@pytest.fixture(scope="function")
+def pilot_page(pilot_context, request):
+    page = pilot_context.new_page()
+    yield page
+
     if request.node.status == 'failed':
+
         allure.attach(
             body=page.url,
             name="URL",
-            attachment_type=allure.attachment_type.URI_LIST,
+            attachment_type=allure.attachment_type.URI_LIST
         )
         allure.attach(
             page.screenshot(full_page=True),
             name="Screen shot on failure",
-            attachment_type=allure.attachment_type.PNG,
+            attachment_type=allure.attachment_type.PNG
         )
+    page.close()
 
-def pytest_addoption(parser):
-    parser.addoption("--launch_mode", default="remote", choices=["remote", "local"])
-    parser.addoption("--br", action="store", default="ch", choices=["ch", "ff"])
 
-@pytest.fixture()
-def auth(request):
-    with sync_playwright() as playwright:
-        browser_name = request.config.getoption("--br")
-        if browser_name == "ch":
-            browser = playwright.chromium.launch(headless=False)
-        elif browser_name == "ff":
-            browser = playwright.firefox.launch(headless=False)
-        class AuthorizedPage:
+@pytest.fixture(scope="session")
+def atm_dispatcher_moscow_context(browser, request):
+    sppi_auth_client = SppiAuthClient()
+    access_token, refresh_token = sppi_auth_client.atm_dispatcher_moscow_tokens()
+    access_payload, refresh_payload = sppi_auth_client.atm_dispatcher_moscow_payload()
+    storage_state_data = make_storage_state_data(access_payload, refresh_payload)
+    with open("state.json", "w") as f:
+        json.dump({"origins": [storage_state_data]}, f)
+    cookies = make_cokies(access_token, refresh_token)
+    context = browser.new_context(storage_state="state.json")
+    context.add_cookies(cookies)
+    yield context
+    context.close()
 
-            def wrapper(self, auth_type: As) -> Page:
-                access_token, refresh_token = auth_type.tokens()
-                access_payload, refresh_payload = auth_type.payload()
-                storage_state_data = make_storage_state_data(access_payload, refresh_payload)
-                with open("state.json", "w") as f:
-                    json.dump({"origins": [storage_state_data]}, f)
-                self.context = browser.new_context(storage_state="state.json")
-                cookies = make_cokies(access_token, refresh_token)
-                self.context.add_cookies(cookies)
-                self.page = self.context.new_page()
-                return self.page
+@pytest.fixture(scope="function")
+def atm_dispatcher_moscow_page(atm_dispatcher_moscow_context, request):
+    page = atm_dispatcher_moscow_context.new_page()
+    yield page
+    if request.node.status == 'failed':
 
-            def close_context(self):
-                self.context.close()
-                self.page.close()
-                return self
+        allure.attach(
+            body=page.url,
+            name="URL",
+            attachment_type=allure.attachment_type.URI_LIST
+        )
+        allure.attach(
+            page.screenshot(full_page=True),
+            name="Screen shot on failure",
+            attachment_type=allure.attachment_type.PNG
+        )
+    page.close()
 
-        page = AuthorizedPage()
 
-        yield page.wrapper
-
-        page.close_context
-
-        browser.close()
 
 @pytest.fixture(scope="function")
 def name_of_sent_shr():
@@ -86,6 +100,7 @@ def name_of_sent_shr():
     id_shr, name_shr = api_client.get_created_shr_id_name()
     api_client.send_created_shr(id_shr)
     return name_shr
+
 
 @pytest.fixture(scope="function")
 def name_of_ack_shr():
@@ -95,6 +110,7 @@ def name_of_ack_shr():
     api_client.ack_message_for_shr(id_shr)
     return name_shr
 
+
 @pytest.fixture(scope="function")
 def name_of_dep_shr():
     api_client = SppiApiClient()
@@ -103,7 +119,3 @@ def name_of_dep_shr():
     api_client.ack_message_for_shr(id_shr)
     api_client.dep_message_for_shr(id_shr)
     return name_shr
-
-
-
-

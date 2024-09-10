@@ -1,14 +1,13 @@
 import allure
-from utils.pw_helpers import FlightRules, FlightType, TurbulenceCat, Unit, FplType
-from utils.sppi_auth_client import As
 from page_objects.fpl_page import FplPage
 from playwright.sync_api import expect
+from utils.pw_helpers import FlightRules, FlightType, TurbulenceCat, Unit, FplType
 
 
 class TestSendFpl:
-    @allure.feature('')
-    def test_send_fpl_utp_ad_route_from_form(self, auth):
-        fpl = FplPage(auth(As.PILOT))
+    @allure.feature('FPL')
+    def test_send_fpl_utp_ad_route_from_form(self, pilot_page):
+        fpl = FplPage(pilot_page)
         fpl.go_create_fpl_page()
         fpl.close_confirm_modal()
         fpl.choose_fpl_type(FplType.utp_ad())
@@ -30,8 +29,9 @@ class TestSendFpl:
         fpl.button_send_fpl.click()
         fpl.modal_sent_success.is_visible()
 
-    def test_send_fpl_utp_ad_without_route_from_form(self, auth):
-        fpl = FplPage(auth(As.PILOT))
+    @allure.feature('FPL')
+    def test_send_fpl_utp_ad_without_route_from_form(self, pilot_page):
+        fpl = FplPage(pilot_page)
         fpl.go_create_fpl_page()
         fpl.close_confirm_modal()
         fpl.choose_fpl_type(FplType.utp_ad())

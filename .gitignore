@@ -170,3 +170,4 @@ allure-results/
 tests/allure-results/
 tests/state.json
 state.json
+/test-results/

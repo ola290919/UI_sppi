@@ -15,15 +15,11 @@ class ShrMessagePage:
         self.dep_button = self.page.get_by_role('button', name='DEP')
         self.arr_button = self.page.get_by_role('button', name='ARR')
         self.send_ack_button = self.page.get_by_role('button', name='Сформировать ACK')
-        self.ack_sent_modal = self.page.get_by_text('ACK сформирован')
         self.send_rej_button = self.page.get_by_role('button', name='Сформировать REJ')
-        self.rej_sent_modal = self.page.get_by_text('REJ сформирован')
         self.send_cnl_button = self.page.get_by_role('button', name='Подать CNL')
-        self.cnl_sent_modal = self.page.get_by_text('CNL сформирован')
         self.send_dep_button = self.page.get_by_role('button', name='Подать DEP')
-        self.dep_sent_modal = self.page.get_by_text('DEP отправлен')
         self.send_arr_button = self.page.get_by_role('button', name='Подать ARR')
-        self.arr_sent_modal = self.page.get_by_text('ARR отправлен')
+        self.sent_modal = self.page.locator('//simple-snack-bar/span')
 
     @allure.step("Нажать кнопку ACK")
     def ack_button_click(self):
@@ -66,12 +62,12 @@ class ShrMessagePage:
     @allure.step("Отправить ACK на SHR и проверить наличие модального окна")
     def send_ack(self):
         self.send_ack_button.click()
-        self.ack_sent_modal.is_visible()
+        expect(self.sent_modal).to_contain_text('ACK сформирован')
 
     @allure.step("Отправить REJ на SHR и проверить наличие модального окна")
     def send_rej(self):
         self.send_rej_button.click()
-        self.rej_sent_modal.is_visible()
+        expect(self.sent_modal).to_contain_text('REJ сформирован')
 
     @allure.step("Проверить статус {status} у SHR с названием {shr_name}")
     def check_flight_status(self, shr_name, status):
@@ -83,19 +79,14 @@ class ShrMessagePage:
     @allure.step("Отправить CNL на SHR и проверить наличие модального окна")
     def send_cnl(self):
         self.send_cnl_button.click()
-        self.cnl_sent_modal.is_visible()
+        expect(self.sent_modal).to_contain_text('CNL сформирован')
 
     @allure.step("Отправить DEP на SHR и проверить наличие модального окна")
     def send_dep(self):
         self.send_dep_button.click()
-        self.dep_sent_modal.is_visible()
+        expect(self.sent_modal).to_contain_text('DEP отправлен')
 
     @allure.step("Отправить ARR на SHR и проверить наличие модального окна")
     def send_arr(self):
         self.send_arr_button.click()
-        self.arr_sent_modal.is_visible()
-
-
-
-
-
+        expect(self.sent_modal).to_contain_text('ARR не отправлен')

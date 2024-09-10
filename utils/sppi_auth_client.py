@@ -1,7 +1,5 @@
 import os
-import time
 from enum import Enum
-from threading import Lock
 from typing import Tuple
 
 import requests
@@ -32,7 +30,6 @@ class SppiAuthClient:
         self._secret_key = os.getenv('RC_API_SECRET_KEY')
         if not self._secret_key:
             raise Exception('SPPI_API_SECRET_KEY not set')
-
 
     def _make_tokens_request(self, login: str, password: str) -> AuthTokensResult:
         if not login or not password:
@@ -68,14 +65,13 @@ class SppiAuthClient:
 
         return AuthTokensResult(**response)
 
-    def get_access_refresh_token(self, login: str, password: str) -> Tuple[str,str]:
+    def get_access_refresh_token(self, login: str, password: str) -> Tuple[str, str]:
         if not login or not password:
             raise Exception('Login and password are required for getting SPPI tokens')
 
         response = self._make_tokens_request(login, password)
 
         return response.access_token, response.refresh_token
-
 
     @staticmethod
     def get_auth_payload(login: str, password: str) -> Tuple[str, str]:
@@ -104,8 +100,8 @@ class SppiAuthClient:
         return self.get_access_refresh_token(os.getenv('RC_PILOT_USER'), os.getenv('RC_PILOT_PASSWORD'))
 
     def atm_dispatcher_moscow_tokens(self):
-        return self.get_access_refresh_token(os.getenv('RC_ATM_DISPATCHER_MOSCOW_USER'), os.getenv('RC_ATM_DISPATCHER_MOSCOW_PASSWORD'))
-
+        return self.get_access_refresh_token(os.getenv('RC_ATM_DISPATCHER_MOSCOW_USER'),
+                                             os.getenv('RC_ATM_DISPATCHER_MOSCOW_PASSWORD'))
 
     def admin_payload(self):
 
@@ -117,7 +113,52 @@ class SppiAuthClient:
 
     def atm_dispatcher_moscow_payload(self):
 
-        return self.get_auth_payload(os.getenv('RC_ATM_DISPATCHER_MOSCOW_USER'), os.getenv('RC_ATM_DISPATCHER_MOSCOW_PASSWORD'))
+        return self.get_auth_payload(os.getenv('RC_ATM_DISPATCHER_MOSCOW_USER'),
+                                     os.getenv('RC_ATM_DISPATCHER_MOSCOW_PASSWORD'))
+
+    @staticmethod
+    def make_storage_state_data(access_payload, refresh_payload):
+        data = {
+            "origin": os.getenv("BASE_URL_RC"),
+            "localStorage": [
+                {
+                    "name": "sppi6_client_auth",
+                    "value": json.dumps({
+                        "access_token_payload": access_payload,
+                        "refresh_token_payload": refresh_payload,
+                        "refresh_in_progress": False
+                    })
+                }
+            ]
+        }
+        return data
+
+    @staticmethod
+    def make_cokies(access_token, refresh_token):
+        expires = int((datetime.datetime.now() + datetime.timedelta(minutes=3)).timestamp())
+        data = ([
+            {
+                'name': 'refresh_token',
+                'value': refresh_token,
+                'path': '/',
+                'domain': str(os.getenv("BASE_URL_RC")).replace('http://', '.'),
+                'httpOnly': True,
+                'secure': False,
+                'sameSite': 'Strict',
+                'expires': expires
+            },
+            {
+                'name': 'authorization',
+                'value': access_token,
+                'path': '/',
+                'domain': str(os.getenv("BASE_URL_RC")).replace('http://', '.'),
+                'httpOnly': True,
+                'secure': False,
+                'sameSite': 'Strict',
+                'expires': expires
+            }
+        ])
+        return data
 
 
 auth = SppiAuthClient()

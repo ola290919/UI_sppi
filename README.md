@@ -12,6 +12,10 @@
 
 Необходимые для запуска проекта переменные указаны в файле ```.env.example```.
 
+Генерация отчета allure ```C:\Users\mx\Downloads\allure-2.29.0\allure-2.29.0\bin\allure.bat generate allure-results --clean```
+
+Установка переменной ```$Env:JAVA_HOME = "C:\Program Files\Java\jre1.8.0_421"```
+
 ## Запуск
 
 `pytest`
