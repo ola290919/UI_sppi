@@ -28,6 +28,7 @@ def attach_playwright_results(request):
     on failure.
     """
     yield
+    page: Page
     if request.node.status == 'failed':
         allure.attach(
             body=page.url,
@@ -45,7 +46,7 @@ def pytest_addoption(parser):
     parser.addoption("--br", action="store", default="ch", choices=["ch", "ff"])
 
 @pytest.fixture()
-def auth(playwright, request):
+def auth(request):
     browser_name = request.config.getoption("--br")
     if browser_name == "ch":
         browser = playwright.chromium.launch(headless=False)
