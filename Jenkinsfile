@@ -23,6 +23,7 @@ pipeline {
                 python3 -m venv venv
                 . venv/bin/activate
                 pip3 install -r requirements.txt
+                pip3 install pytest-playwright
                 cp ${ENV_MS} .env
                 SELENIUM_REMOTE_URL="http://10.0.1.17:4444" pytest --numprocesses ${NUMPROCESS} --alluredir ${ALLURE_RESULTS}
                 rm -f .env
