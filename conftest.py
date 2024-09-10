@@ -23,7 +23,7 @@ def pytest_runtest_makereport(item, call):
 
 
 @pytest.fixture(autouse=True)
-def attach_playwright_results(page: Page, request):
+def attach_playwright_results(request):
     """Fixture to perform teardown actions and attach results to Allure report
     on failure.
     """
@@ -45,7 +45,7 @@ def pytest_addoption(parser):
     parser.addoption("--br", action="store", default="ch", choices=["ch", "ff"])
 
 @pytest.fixture()
-def auth(playwright, page: Page, request):
+def auth(playwright, request):
     browser_name = request.config.getoption("--br")
     if browser_name == "ch":
         browser = playwright.chromium.launch(headless=False)
