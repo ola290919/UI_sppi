@@ -79,7 +79,7 @@ class SppiAuthClient:
 
     @staticmethod
     def get_auth_payload(login: str, password: str) -> Tuple[str, str]:
-        url = f'{os.getenv('BASE_URL_RC')}/user-service/tokens'
+        url = f"{os.getenv('BASE_URL_RC')}/user-service/tokens"
         headers = {
             'captcha': 'skip-captcha',
             'skip-captcha': 'true'
