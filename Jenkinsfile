@@ -25,8 +25,9 @@ pipeline {
                 python3 -m venv venv
                 . venv/bin/activate
                 pip3 install -r requirements.txt
-                source ${ENV_MS}
+                cp ${ENV_MS} .env
                 SELENIUM_REMOTE_URL="http://10.0.1.17:4444" pytest --br ${BROWSER}  --numprocesses ${NUMPROCESS} --alluredir ${ALLURE_RESULTS}
+                rm -f .env
                 '''
               }
              }
