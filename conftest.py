@@ -8,7 +8,7 @@ import allure
 from utils.auth_helpers import make_storage_state_data, make_cokies
 from utils.sppi_auth_client import As
 from utils.sppi_api_client import SppiApiClient
-from playwright.sync_api import Page, BrowserType
+from playwright.sync_api import Page, sync_playwright
 from page_objects.shr_message_page import ShrMessagePage
 
 
@@ -47,38 +47,38 @@ def pytest_addoption(parser):
 
 @pytest.fixture()
 def auth(request):
-    browser_name = request.config.getoption("--br")
-    if browser_name == "ch":
-        browser = playwright.chromium.launch(headless=False)
-    elif  browser_name == "ff":
-        browser = playwright.firefox.launch(headless=False)
+    with sync_playwright() as playwright:
+        browser_name = request.config.getoption("--br")
+        if browser_name == "ch":
+            browser = playwright.chromium.launch(headless=False)
+        elif browser_name == "ff":
+            browser = playwright.firefox.launch(headless=False)
+        class AuthorizedPage:
 
-    class AuthorizedPage:
+            def wrapper(self, auth_type: As) -> Page:
+                access_token, refresh_token = auth_type.tokens()
+                access_payload, refresh_payload = auth_type.payload()
+                storage_state_data = make_storage_state_data(access_payload, refresh_payload)
+                with open("state.json", "w") as f:
+                    json.dump({"origins": [storage_state_data]}, f)
+                self.context = browser.new_context(storage_state="state.json")
+                cookies = make_cokies(access_token, refresh_token)
+                self.context.add_cookies(cookies)
+                self.page = self.context.new_page()
+                return self.page
 
-        def wrapper(self, auth_type: As) -> Page:
-            access_token, refresh_token = auth_type.tokens()
-            access_payload, refresh_payload = auth_type.payload()
-            storage_state_data = make_storage_state_data(access_payload, refresh_payload)
-            with open("state.json", "w") as f:
-                json.dump({"origins": [storage_state_data]}, f)
-            self.context = browser.new_context(storage_state="state.json")
-            cookies = make_cokies(access_token, refresh_token)
-            self.context.add_cookies(cookies)
-            self.page = self.context.new_page()
-            return self.page
+            def close_context(self):
+                self.context.close()
+                self.page.close()
+                return self
 
-        def close_context(self):
-            self.context.close()
-            self.page.close()
-            return self
+        page = AuthorizedPage()
 
-    page = AuthorizedPage()
+        yield page.wrapper
 
-    yield page.wrapper
+        page.close_context
 
-    page.close_context
-
-    browser.close()
+        browser.close()
 
 @pytest.fixture(scope="function")
 def name_of_sent_shr():
