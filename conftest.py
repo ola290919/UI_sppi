@@ -19,7 +19,7 @@ def pytest_runtest_makereport(item, call):
 
 @pytest.fixture(scope="session")
 def browser(playwright):
-    browser = playwright.chromium.launch(headless=False, args=["--maximized"])
+    browser = playwright.chromium.launch(headless=False)
 
     yield browser
 

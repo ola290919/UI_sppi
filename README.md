@@ -12,7 +12,7 @@
 
 Необходимые для запуска проекта переменные указаны в файле ```.env.example```.
 
-Генерация отчета allure ```C:\Users\mx\Downloads\allure-2.29.0\allure-2.29.0\bin\allure.bat generate allure-results --clean```
+Генерация локально отчета allure (прописать свой путь) ```C:\Users\mx\Downloads\allure-2.29.0\allure-2.29.0\bin\allure.bat generate allure-results --clean```
 
 Установка переменной java ```$Env:JAVA_HOME = "C:\Program Files\Java\jre1.8.0_421"```
 
@@ -37,6 +37,11 @@
 `pytest`
 
 Запуск в jenkins через jenkinsfile
+
+Для запуска в несколько потоков можно использовать `pytest -n 4`, где `-n` - количество потоков.
+
+В pytest.ini заданы параметры запуска с автоматическим созданием отчета allure  `--alluredir allure-results`.
+
 
 ### Структура
 
